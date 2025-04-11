@@ -27,6 +27,10 @@ jobs:
       - name: Build the Docker image
         run: docker build -t ghcr.io/xyloite-dev/xt_vox_python:${{ env.BUILD_NUMBER }} . --no-cache
 
+        
+     - name: Log in to GHCR
+        run: echo "${{ secrets.COMMAN_TOKEN}}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+
       - name: Build and push Docker image
         run: |
           docker build -t ghcr.io/xyloite-dev/xt_vox_python:${{ env.BUILD_NUMBER }} .
