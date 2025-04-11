@@ -1,40 +1,32 @@
-name: CI - Docker Build & Push to GHCR
+name:  Docker Image CI XT_VOX_AI
 
 on:
   push:
-    branches:
-      - main  # Trigger the workflow on push to the main branch
-
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
 jobs:
-  build:
+  build-and-push:
     runs-on: ubuntu-latest
 
     steps:
-      # 1. Check out the repository
-      - name: Checkout repository
-        uses: actions/checkout@v2
 
-      # 2. Set up Docker Buildx (optional, but useful for multi-platform builds)
-      - name: Set up Docker Buildx
-        uses: docker/setup-buildx-action@v2
+      # Check out the code
+      - name: Check out the code
+        uses: actions/checkout@v4
 
-      # 3. Log in to GitHub Container Registry
+      # Set the build number
+      - name: Set the build number
+        run: echo "BUILD_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
+
+      # Log in to GitHub Container Registry
       - name: Log in to GitHub Container Registry
-        uses: docker/login-action@v4
-       
+        run: echo "${{ secrets.GHCR_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
 
-      # 4. Build the Docker image with a tag
-      - name: Build Docker image
-        run: |
-          docker build -t ghcr.io/${{ github.repository_owner }}/myapp:${{ github.sha }} .
+      # Build the Docker image
+      - name: Build the Docker image
+        run: docker build -t ghcr.io/xyloite-dev/xt_vox_python:${{ env.BUILD_NUMBER }} . --no-cache
 
-      # 5. Push the Docker image to GitHub Container Registry
-      - name: Push Docker image to GHCR
-        run: |
-          docker push ghcr.io/${{ github.repository_owner }}/myapp:${{ github.sha }}
-      
-      # Optional: Tag the image as latest and push it
-      - name: Tag image as latest
-        run: |
-          docker tag ghcr.io/${{ github.repository_owner }}/myapp:${{ github.sha }} ghcr.io/${{ github.repository_owner }}/myapp:latest
-          docker push ghcr.io/${{ github.repository_owner }}/myapp:latest
+      # Push the Docker image to GitHub Container Registry
+      - name: Push the Docker image
+        run: docker push ghcr.io/xyloite-dev/xt_vox_python:${{ env.BUILD_NUMBER }}
