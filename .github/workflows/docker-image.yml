@@ -31,14 +31,16 @@ jobs:
 
       # Step 5: Push the Docker image to GHCR
       - name: Push the Docker image to GHCR
-        run: |
+        run: | 
+         docker push ghcr.io/xyloite-dev/xt_vox_python:18
          docker push ghcr.io/xyloite-dev/xt_vox_python:18
          docker push ghcr.io/xyloite-dev/xt_vox_python:18
          docker push ghcr.io/xyloite-dev/xt_vox_python:17
-           shell: /usr/bin/bash -e {0}
-         env:
-           BUILD_NUMBER: 17
-             shell: /usr/bin/bash -e {0}
-        env:
-          BUILD_NUMBER: 18
+    shell: /usr/bin/bash -e {0}
+  env:
+    BUILD_NUMBER: 17
+      shell: /usr/bin/bash -e {0}
+  shell: /usr/bin/bash -e {0}
+  env:
+    BUILD_NUMBER: 18
 
