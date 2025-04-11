@@ -33,4 +33,8 @@ jobs:
       - name: Push the Docker image to GHCR
         run: |
           docker push ghcr.io/xyloite-dev/xt_vox_python:${{ env.BUILD_NUMBER }}
+          docker push ghcr.io/xyloite-dev/xt_vox_python:17
+          shell: /usr/bin/bash -e {0}
+          env:
+          BUILD_NUMBER: 17
 
