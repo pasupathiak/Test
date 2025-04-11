@@ -28,5 +28,7 @@ jobs:
         run: docker build -t ghcr.io/xyloite-dev/xt-vox-ai-be:${{ env.BUILD_NUMBER }} . --no-cache
 
       # Step 5: Push Docker image to GHCR
-      - name: Push Docker image XT-VoX-AI-BE
-        run: docker push ghcr.io/xyloite-dev/xt-vox-ai-be:${{ env.BUILD_NUMBER }}
+      -  name: Push Docker image with a tag
+        run: |
+           docker tag myusername/myapp:${{ github.sha }} pasupathiak/myapp:latest
+           docker push pasupathiak/myapp:latest
