@@ -9,6 +9,7 @@ on:
       - "main"  # Trigger on pull requests targeting the 'main' branch
 
 jobs:
+
   build-and-push:
     runs-on: ubuntu-latest
 
