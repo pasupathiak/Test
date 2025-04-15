@@ -46,7 +46,7 @@ jobs:
 
       - name: Push Docker image
         run: |
-          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ v0.0.2 }}  # Fixed image name
+          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}  # Fixed image name
           docker push $IMAGE
 
       - name: Create Git tag for version
