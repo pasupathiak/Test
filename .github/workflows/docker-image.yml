@@ -10,6 +10,7 @@ permissions:
   contents: write  # Needed for git tag push
 
 jobs:
+
   build-and-push:
     runs-on: ubuntu-latest
 
