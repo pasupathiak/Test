@@ -1,35 +1,41 @@
-name: Docker Image CI XT_VOX_AI
+name: Build and Push Docker Images (v1 and v2)
 
 on:
-  push:
-    branches:
-      - "main"  # Trigger on push to the 'main' branch
-  pull_request:
-    branches:
-      - "main"  # Trigger on pull requests targeting the 'main' branch
+  workflow_dispatch:  # Manual trigger for testing, change to `push:` if needed
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
+    env:
+      IMAGE_NAME: xt_vox_python
+      VERSION_1: v1
+      VERSION_2: v2
+
     steps:
-      # Step 1: Check out the code
-      - name: Check out the code
-        uses: actions/checkout@v2
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-      # Step 2: Set the build number based on the GitHub run number
-      - name: Set the build number
-        run: echo "BUILD_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.SIMPLE_TOKEN }}  # or use your own PAT in `secrets.SIMPLE_TOKEN`
 
-      # Step 3: Log in to GitHub Container Registry (GHCR)
-      - name: Log in to GitHub Container Registry
-        run: echo "${{ secrets.SIMPLE_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      - name: Build Docker image
+        run: |
+          IMAGE_BASE=ghcr.io/${{ pasupathiak }}/${{ env.IMAGE_NAME }}
+          docker build -t $IMAGE_BASE:build-temp .
 
-      # Step 4: Build the Docker image
-      - name: Build the Docker image
-        run: docker build -t ghcr.io/pasupathiak/xt_vox_python:${{ env.BUILD_NUMBER }} . --no-cache
+      - name: Tag and Push v1 and v2
+        run: |
+          IMAGE_BASE=ghcr.io/${{ pasupathiak }}/${{ env.IMAGE_NAME }}
 
-      # Step 5: Push the Docker image to GHCR
-      - name: Push the Docker image to GHCR
-        run: docker push ghcr.io/pasupathiak/xt_vox_python:${{ env.BUILD_NUMBER }}
-   
+          # Tagging
+          docker tag $IMAGE_BASE:build-temp $IMAGE_BASE:${{ env.VERSION_1 }}
+          docker tag $IMAGE_BASE:build-temp $IMAGE_BASE:${{ env.VERSION_2 }}
+
+          # Push both tags
+          docker push $IMAGE_BASE:${{ env.VERSION_1 }}
+          docker push $IMAGE_BASE:${{ env.VERSION_2 }}
