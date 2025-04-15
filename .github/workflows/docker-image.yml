@@ -40,7 +40,7 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}  # ✅ FIXED
-          password: ${{ secrets.GITHUB_TOKEN }}  # ✅ Use a PAT if you get permission denied
+          password: ${{ secrets.SIMPLE_TOKEN }}  # ✅ Use a PAT if you get permission denied
 
       - name: Build Docker image
         run: |
