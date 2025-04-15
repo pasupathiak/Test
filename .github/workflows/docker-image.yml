@@ -4,7 +4,9 @@ name: Build and Push Docker Image with Version
 on:
   push:
     branches:
-      - main
+           - main
+       workflow_dispatch:  # Optional: allow manual runs
+      
 
 jobs:
   build-and-push:
