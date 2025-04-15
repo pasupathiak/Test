@@ -1,36 +1,64 @@
+
 name: Build and Push Docker Image with Version
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Allow manual trigger with custom version
+  workflow_dispatch:  # Optional: allow manual runs
 
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
 
-    env:
-      IMAGE_NAME: xt_vox_python
-      VERSION: v1 
-
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
 
-      - name: Log in to GitHub Container Registry (GHCR)
+      - name: Set up Git environment
+        run: |
+          # Fetch all tags from the remote repository to get the latest tag
+          git fetch --prune --unshallow --tags
+          
+      - name: Determine Version
+        id: version
+        run: |
+          # Get the latest tag or default to v0.0.1 if no tags are found
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          
+          # Parse the version from the tag (assumes tag format vX.Y.Z)
+          MAJOR=$(echo $LAST_TAG | cut -d '.' -f1 | sed 's/v//')
+          MINOR=$(echo $LAST_TAG | cut -d '.' -f2)
+          PATCH=$(echo $LAST_TAG | cut -d '.' -f3)
+          
+          # Increment the patch version (or major/minor based on your needs)
+          PATCH=$((PATCH + 1))
+          
+          # Create the new version tag
+          NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          
+          # Output the new version as an environment variable
+          echo "New version: $NEW_VERSION"
+          echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
+
+      - name: Log in to GHCR
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ${{ pasupatiak }}
+          username: ${{ github.actor }}
           password: ${{ secrets.SIMPLE_TOKEN }}
 
       - name: Build Docker image
         run: |
-          IMAGE=ghcr.io/${{ github.repository_owner }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          IMAGE=ghcr.io/pasupathiak/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
           docker build -t $IMAGE .
 
-      - name: Push Docker image with version tag
+      - name: Push Docker image
         run: |
-          IMAGE=ghcr.io/${{ pasupathiak }}/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
+          IMAGE=ghcr.io/pasupathiak/${{ env.IMAGE_NAME }}:${{ env.VERSION }}
           docker push $IMAGE
+
+      - name: Create Git tag for version
+        run: |
+          git tag ${{ env.VERSION }}
+          git push origin ${{ env.VERSION }}
