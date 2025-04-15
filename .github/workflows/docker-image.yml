@@ -27,7 +27,7 @@ jobs:
 
       # Step 4: Build the Docker image
       - name: Build the Docker image
-        run: docker build -t ghcr.io/xyloite-dev/xt_vox_python:${{ env.BUILD_NUMBER }} . --no-cache
+        run: docker build -t ghcr.io/pasupathiak/xt_vox_python:${{ env.BUILD_NUMBER }} . --no-cache
 
       # Step 5: Push the Docker image to GHCR
       - name: Push the Docker image to GHCR
