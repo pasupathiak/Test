@@ -23,7 +23,7 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: pasupathiak # 🔁 Replace with PAT owner username
+          username: xyloite-dev
           password: ${{ secrets.SIMPLE_TOKEN }}
 
       - name: Build image
