@@ -4,7 +4,10 @@ on:
   push:
     branches:
       - main
-  workflow_dispatch:  # Optional: allow manual runs
+  workflow_dispatch:
+
+permissions:
+  contents: write  # Needed for git tag push
 
 jobs:
   build-and-push:
@@ -36,20 +39,22 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ${{ pasupathiak }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          username: ${{ github.actor }}  # ✅ FIXED
+          password: ${{ secrets.GITHUB_TOKEN }}  # ✅ Use a PAT if you get permission denied
 
       - name: Build Docker image
         run: |
-          IMAGE=ghcr.io/ghcr.io/pasupathiak/image:tag/xt_vox_python:${{ env.VERSION }}  # Fixed image name
+          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}  # ✅ FIXED
           docker build -t $IMAGE .
 
       - name: Push Docker image
         run: |
-          IMAGE=ghcr.io/ghcr.io/pasupathiak/image:tag/xt_vox_python:${{ env.VERSION }}  # Fixed image name
-          docker push $IMAGE .
+          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}  # ✅ FIXED
+          docker push $IMAGE
 
       - name: Create Git tag for version
         run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
           git tag ${{ env.VERSION }}
           git push origin ${{ env.VERSION }}
