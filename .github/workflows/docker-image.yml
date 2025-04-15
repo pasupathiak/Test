@@ -14,23 +14,27 @@ jobs:
 
     permissions:
       contents: read
-      packages: write  # Required for GHCR push
+      packages: write  # Required if using GITHUB_TOKEN, but still good practice
 
     env:
       IMAGE_NAME: xt_vox_python
 
     steps:
-      # Step 1: Check out the code
+      # Step 1: Checkout the repository
       - name: Check out the code
         uses: actions/checkout@v3
 
-      # Step 2: Set the build number
+      # Step 2: Set the build number (used as image tag)
       - name: Set build number
         run: echo "BUILD_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
 
-      # Step 3: Log in to GitHub Container Registry (GHCR)
-      - name: Log in to GHCR
-        run: echo "${{ secrets.TEST_TOKEN }}" | docker login ghcr.io -u ${{ github.actor }} --password-stdin
+      # Step 3: Log in to GitHub Container Registry with PAT
+      - name: Log in to GHCR with PAT
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: xyloite-bot  # 🔁 Replace with the PAT owner's GitHub username
+          password: ${{ secrets.SIMPLE_TOKEN}}  # 🔐 Set this in repo secrets
 
       # Step 4: Build the Docker image
       - name: Build Docker image
@@ -39,8 +43,9 @@ jobs:
           echo "Building image: $IMAGE_TAG"
           docker build -t $IMAGE_TAG .
 
-      # Step 5: Push Docker image
+      # Step 5: Push Docker image to GHCR
       - name: Push Docker image
         run: |
           IMAGE_TAG=ghcr.io/xyloite-dev/${{ env.IMAGE_NAME }}:${{ env.BUILD_NUMBER }}
+          echo "Pushing image: $IMAGE_TAG"
           docker push $IMAGE_TAG
