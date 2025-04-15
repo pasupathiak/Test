@@ -1,37 +1,36 @@
-name: Build and Push to GHCR
+name: Build and Push Python App to GHCR
 
 on:
   push:
     branches:
       - main
 
+permissions:
+  contents: read
+  packages: write
+
 jobs:
   build-and-push:
     runs-on: ubuntu-latest
-
-    env:
-      IMAGE_NAME: xt_vox_python
-
     steps:
       - name: Checkout code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
-      - name: Set build number
-        run: echo "BUILD_NUMBER=${{ github.run_number }}" >> $GITHUB_ENV
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'  # Replace with your Python version
 
-      - name: Login to GHCR
-        uses: docker/login-action@v2
+      - name: Log in to GitHub Container Registry
+        uses: docker/login-action@v3
         with:
           registry: ghcr.io
-          username: xyloite-dev
+          username: ${{ github.actor }}
           password: ${{ secrets.SIMPLE_TOKEN }}
 
-      - name: Build image
-        run: |
-          IMAGE_TAG=ghcr.io/xyloite-dev/${{ env.IMAGE_NAME }}:${{ env.BUILD_NUMBER }}
-          docker build -t $IMAGE_TAG .
-
-      - name: Push image
-        run: |
-          IMAGE_TAG=ghcr.io/xyloite-dev/${{ env.IMAGE_NAME }}:${{ env.BUILD_NUMBER }}
-          docker push $IMAGE_TAG
+      - name: Build and push Docker image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          push: true
+          tags: ghcr.io/${{ github.repository }}/python-app:latest
