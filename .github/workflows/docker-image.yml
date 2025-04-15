@@ -41,12 +41,12 @@ jobs:
 
       - name: Build Docker image
         run: |
-          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}  # Fixed image name
+          IMAGE=ghcr.io/ghcr.io/pasupathiak/image:tag/xt_vox_python:${{ env.VERSION }}  # Fixed image name
           docker build -t $IMAGE .
 
       - name: Push Docker image
         run: |
-          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}  # Fixed image name
+          IMAGE=ghcr.io/ghcr.io/pasupathiak/image:tag/xt_vox_python:${{ env.VERSION }}  # Fixed image name
           docker push $IMAGE .
 
       - name: Create Git tag for version
