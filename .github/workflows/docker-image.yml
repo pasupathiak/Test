@@ -31,7 +31,5 @@ jobs:
 
       # Step 5: Push the Docker image to GHCR
       - name: Push the Docker image to GHCR
-        run: |
-          LOWERCASE_REPO=$(echo "${{ github.repository }}" 
-          docker tag ghcr.io/pasupathiak/xt_vox_python:${{ env.BUILD_NUMBER }} /latest
-          docker push ghcr.io/latest
+        run: docker push ghcr.io/pasupathiak/xt_vox_python:${{ env.BUILD_NUMBER }}
+   
