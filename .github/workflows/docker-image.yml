@@ -1,15 +1,10 @@
-name: Build and Push Docker Image with Semantic Version
+name: Build and Push Docker Image with Version
 
 on:
   push:
     branches:
       - main
-  workflow_dispatch:
-
-permissions:
-  contents: write 
-  
-  workflow_dispatch:
+  workflow_dispatch:  # Optional: allow manual runs
 
 jobs:
   build-and-push:
@@ -26,15 +21,13 @@ jobs:
       - name: Determine Version
         id: version
         run: |
-          LAST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          echo "Last tag: $LAST_TAG"
-
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
           MAJOR=$(echo $LAST_TAG | cut -d '.' -f1 | sed 's/v//')
           MINOR=$(echo $LAST_TAG | cut -d '.' -f2)
           PATCH=$(echo $LAST_TAG | cut -d '.' -f3)
-
+          
           PATCH=$((PATCH + 1))
-
+          
           NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
           echo "New version: $NEW_VERSION"
           echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
@@ -48,17 +41,15 @@ jobs:
 
       - name: Build Docker image
         run: |
-          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}
+          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}  # Fixed image name
           docker build -t $IMAGE .
 
       - name: Push Docker image
         run: |
-          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}
-          docker push $IMAGE
+          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}  # Fixed image name
+          docker push $IMAGE .
 
       - name: Create Git tag for version
         run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
           git tag ${{ env.VERSION }}
           git push origin ${{ env.VERSION }}
