@@ -1,17 +1,15 @@
 name: Build and Push Docker Image with Version
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
+  release:
+    types:
+      - published
   workflow_dispatch:
-
 
 permissions:
   contents: write  # Needed for git tag push
 
 jobs:
-
   build-and-push:
     runs-on: ubuntu-latest
 
@@ -31,7 +29,7 @@ jobs:
           MINOR=$(echo $LAST_TAG | cut -d '.' -f2)
           PATCH=$(echo $LAST_TAG | cut -d '.' -f3)
           
-          PATCH=$((PATCH + 1))
+          PATCH=$((PATCH + 11))
           
           NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
           echo "New version: $NEW_VERSION"
@@ -41,17 +39,17 @@ jobs:
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
-          username: ${{ github.actor }}  # ✅ FIXED
-          password: ${{ secrets.SIMPLE_TOKEN }}  # ✅ Use a PAT if you get permission denied
+          username: ${{ github.actor }}
+          password: ${{ secrets.DEMO_TOKEN }}
 
       - name: Build Docker image
         run: |
-          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}  # ✅ FIXED
+          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}
           docker build -t $IMAGE .
 
       - name: Push Docker image
         run: |
-          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}  # ✅ FIXED
+          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}
           docker push $IMAGE
 
       - name: Create Git tag for version
