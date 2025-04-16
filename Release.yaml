@@ -15,7 +15,7 @@ jobs:
       - name: Create GitHub Release
         uses: actions/create-release@v1
         with:
-          tag_name: ${{ github.V0.0.4 }}
+          tag_name: ${{ github.V10.11.12 }}
           release_name: ${{ github.v10.11.12 }}
           body: "This release was automatically created."
           draft: false
