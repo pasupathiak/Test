@@ -2,10 +2,10 @@ name: Build and Push Docker Image with Version
 
 on:
   push:
-    branches:
-      - main1
-      
+    tags:
+      - 'v*.*.*'
   workflow_dispatch:
+
 
 permissions:
   contents: write  # Needed for git tag push
