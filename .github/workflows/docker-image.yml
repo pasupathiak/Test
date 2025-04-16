@@ -30,7 +30,7 @@ jobs:
           MINOR=$(echo $LAST_TAG | cut -d '.' -f2)
           PATCH=$(echo $LAST_TAG | cut -d '.' -f3)
           
-          PATCH=$((PATCH + 11))
+          PATCH=$((PATCH + 1))
           
           NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
           echo "New version: $NEW_VERSION"
