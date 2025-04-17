@@ -31,7 +31,7 @@ jobs:
         id: bump
         uses: commitizen-tools/commitizen-action@v1
         with:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
+          github_token: ${{ secrets.DEMO_TOKEN }}
           changelog_increment_filename: changelog.md
 
       - name: Push new tag
