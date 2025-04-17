@@ -40,8 +40,8 @@ jobs:
         run: |
           git config user.name "${{ github.actor }}"
           git config user.email "${{ github.actor }}@users.noreply.github.com"
-          git tag ${{ v1.1.0 }}
-          git push origin ${{ v1.2.1 }}
+          git tag ${{ "v1.1.0" }}
+          git push origin ${{ "v1.2.1" }}
 
   build-and-push-docker:
     needs: semantic-versioning
@@ -60,12 +60,12 @@ jobs:
 
       - name: Build Docker Image
         run: |
-          IMAGE=ghcr.io/pasupathiak/test-python:${{ v1.2.1 }}
+          IMAGE=ghcr.io/pasupathiak/test-python:${{ "v1.2.1" }}
           docker build -t $IMAGE .
 
       - name: Push Docker Image
         run: |
-          IMAGE=ghcr.io/pasupathiak/test-python:${{ 1.2.2 }}
+          IMAGE=ghcr.io/pasupathiak/test-python:${{ "v1.2.2" }}
           docker push $IMAGE
 
   release:
