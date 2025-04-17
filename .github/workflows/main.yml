@@ -74,6 +74,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           body_path: changelog.md
-          tag_name: ${{ "v0.0.5 }}
+          tag_name: ${{ env.NEW_TAG  }}
         env:
           GITHUB_TOKEN: ${{ secrets.DEMO_TOKEN }}
