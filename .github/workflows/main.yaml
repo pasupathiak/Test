@@ -1,4 +1,4 @@
-name: Release Automation
+name: Semantic Versioning and Release for Python
 
 on:
   push:
@@ -34,7 +34,7 @@ jobs:
           NEW_TAG=$(cz bump --dry-run --stdout | tail -n 1)
           echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
         env:
-          GITHUB_TOKEN: ${{ secrets.TEST_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
       - name: Push new tag
         if: env.NEW_TAG != ''
@@ -44,7 +44,7 @@ jobs:
           git tag ${{ env.NEW_TAG }}
           git push origin ${{ env.NEW_TAG }}
         env:
-          GITHUB_TOKEN: ${{ secrets.TEST_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SIMPLE_TOKEN }}
 
   build-and-publish:
     needs: bump-version
@@ -55,7 +55,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          IMAGE=ghcr.io/${{ github.test }}:${{ "v1.1.2 }}
+          IMAGE=ghcr.io/${{ github.repository }}:${{ env.NEW_TAG }}
           docker build -t $IMAGE .
           docker push $IMAGE
 
@@ -74,6 +74,6 @@ jobs:
         uses: softprops/action-gh-release@v1
         with:
           body_path: changelog.md
-          tag_name: ${{ "v1.2.3" }}
+          tag_name: ${{ env.NEW_TAG }}
         env:
-          GITHUB_TOKEN: ${{ secrets.TEST_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SIMPLE_TOKEN }}
