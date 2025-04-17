@@ -1,13 +1,21 @@
-name: automated trigger workflow
-
-on:
-  push:
-    tags:
-      - "v*" # Triggers the workflow for tags starting with "v"
-  workflow_dispatch: # Allows manual triggering of the workflow
-
-permissions:
-  contents: write # Required for pushing tags and releases
+# Name of the workflow 
+name: Release 
+# Run on every commit tag which begins with "v" (e.g., "v0.1.4") 
+   on: 
+     push: 
+       tags: 
+     # Automatically create a GitHub Release, with release details specified (the relevant commits) 
+  jobs: 
+    release: 
+      name: 
+        "Release" 
+         runs-on: "ubuntu-latest" 
+     steps: 
+    uses: "pasupathiak/action-automatic-releases@latest" 
+   with: 
+    repo_token: "${{ secrets.SIMPLE_TOKEN}}" 
+  prerelease: 
+  false
 
 jobs:
   build-and-push:
