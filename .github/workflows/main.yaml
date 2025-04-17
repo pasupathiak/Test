@@ -1,4 +1,4 @@
-name: Semantic Versioning and Release for Python
+name: Release
 
 on:
   push:
@@ -6,9 +6,7 @@ on:
       - main
   workflow_dispatch:
 
-permissions:
-  contents: write
-  id-token: SIMPLE_TOKEN
+jobs:
   bump-version:
     runs-on: ubuntu-latest
     steps:
@@ -27,15 +25,27 @@ permissions:
 
       - name: Bump version and generate changelog
         id: bump
+        run: |
+          cz bump --yes --check-consistency
+          NEW_TAG=$(cz bump --dry-run --stdout | tail -n 1)
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
         env:
-          GITHUB_TOKEN: ${{ secrets.DEMO_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Push new tag
-        if: "v0.1.1"
+        if: ${{ env.NEW_TAG }}
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git tag ${{ env.NEW_TAG }}
           git push origin ${{ env.NEW_TAG }}
         env:
-          GITHUB_TOKEN: ${{ secrets.DEMO_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Create GitHub release
+        if: ${{ env.NEW_TAG }}
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ env.NEW_TAG }}
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
