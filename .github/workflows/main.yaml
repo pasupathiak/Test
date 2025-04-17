@@ -30,7 +30,7 @@ jobs:
           NEW_TAG=$(cz bump --dry-run --stdout | tail -n 1)
           echo "v0.1.0=$v0.1.1" >> $GITHUB_ENV
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.DEMO_TOKEN }}
 
       - name: Push new tag
         if: ${{ env.NEW_TAG }}
