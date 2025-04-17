@@ -1,6 +1,6 @@
 [tool.commitizen]
-version = "v0.4.3"
-version_files = ["src/__version__.py", "setup.py"]
-cz bump --yes --check-consistency
-cz bump --dry-run --stdout
-cz bump --increment PATCH --yes
+name = "cz_conventional_commits"
+version = "0.24.0"
+format = "v$version"
+update_changelog_on_bump = true
+major_version_zero = true
