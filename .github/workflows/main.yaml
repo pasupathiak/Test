@@ -1,10 +1,14 @@
-name: Release
+name: Semantic Versioning and Release for Python
 
 on:
   push:
     branches:
       - main
   workflow_dispatch:
+
+permissions:
+  contents: write
+  id-token: write
 
 jobs:
   bump-version:
@@ -25,28 +29,45 @@ jobs:
 
       - name: Bump version and generate changelog
         id: bump
-       run: |
-          cz bump --yes --check-consistency
-          NEW_TAG=$(cz bump --dry-run --stdout | tail -n 1)
-          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
-        env:
-        GITHUB_TOKEN: ${{ secrets.DEMO_TOKEN }}
-
+        uses: commitizen-tools/commitizen-action@v1
+        with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          changelog_increment_filename: changelog.md
 
       - name: Push new tag
-        if: ${{ env.NEW_TAG }}
+        if: steps.bump.outputs.version != ''
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
-          git tag ${{ env.NEW_TAG }}
-          git push origin ${{ env.NEW_TAG }}
+          git tag ${{ steps.bump.outputs.version }}
+          git push origin ${{ steps.bump.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  build-and-publish:
+    needs: bump-version
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Build Docker image
+        run: |
+          IMAGE=ghcr.io/${{ github.repository }}:${{ steps.bump.outputs.version }}
+          docker build -t $IMAGE .
+          docker push $IMAGE
+
+  create-release:
+    needs: build-and-publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
       - name: Create GitHub release
-        if: ${{ env.NEW_TAG }}
         uses: softprops/action-gh-release@v1
         with:
-          tag_name: ${{ env.NEW_TAG }}
+          body_path: changelog.md
+          tag_name: ${{ steps.bump.outputs.version }}
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
