@@ -27,10 +27,6 @@ permissions:
 
       - name: Bump version and generate changelog
         id: bump
-        run: |
-          cz bump --yes --check-consistency
-          NEW_TAG=$(cz bump --dry-run --stdout | tail -n 1)
-          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
         env:
           GITHUB_TOKEN: ${{ secrets.DEMO_TOKEN }}
 
