@@ -1,6 +1,4 @@
   name: release
-  
-    needs: versioning
     
     runs-on: ubuntu-latest
     steps:
