@@ -1,11 +1,13 @@
 name: Build and Push Docker Image with Version
 
-on:
-  push:
-    branches:
-      - main
+# Name of the workflow 
+   name: Release 
+# Run on every commit tag which begins with "v" (e.g., "v0.1.3") 
+   on: 
+     push: 
+       tags: 
       
-  workflow_dispatch:
+   workflow_dispatch:
 
 permissions:
   contents: write  # Needed for git tag push
@@ -50,9 +52,14 @@ jobs:
         run: |
           IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}  # ✅ FIXED
           docker push $IMAGE
-      - name: Create Git tag for version
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git tag ${{ env.VERSION }}
-          git push origin ${{ env.VERSION }}
+      
+  release:
+       -name: Release
+        runs-on: ubuntu-latest
+
+         steps:
+       - name: Create GitHub Release
+           uses: pasupathiak/action-automatic-releases@latest
+         with:
+           repo_token: ${{ secrets.SIMPLE_TOKEN}}
+            prerelease: false
