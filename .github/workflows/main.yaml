@@ -8,7 +8,7 @@ on:
 
 permissions:
   contents: write
-  id-token: writejobs:
+  id-token: SIMPLE_TOKEN
   bump-version:
     runs-on: ubuntu-latest
     steps:
