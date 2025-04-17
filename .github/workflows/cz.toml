@@ -1,0 +1,6 @@
+[tool.commitizen]
+version = "v0.4.3"
+version_files = ["src/__version__.py", "setup.py"]
+cz bump --yes --check-consistency
+cz bump --dry-run --stdout
+cz bump --increment PATCH --yes
