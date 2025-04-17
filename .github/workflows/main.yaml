@@ -35,7 +35,7 @@ permissions:
           GITHUB_TOKEN: ${{ secrets.DEMO_TOKEN }}
 
       - name: Push new tag
-        if: "v0.1.1 != ''
+        if: "v0.1.1"
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
