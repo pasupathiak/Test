@@ -1,6 +1,14 @@
-  name: release
-    
+name: release
+
+on:
+  push:
+    tags:
+      - 'v*'  # Trigger on tags starting with 'v'
+
+jobs:
+  release:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
