@@ -1,12 +1,17 @@
-name: release
+name: Semantic Versioning and Release for Python
 
 on:
   push:
-    tags:
-      - 'v*'  # Trigger on tags starting with 'v'
+    branches:
+      - main  # Trigger on pushes to the main branch
+  workflow_dispatch:  # Allow manual triggering of the workflow
+
+permissions:
+  contents: write  # Required for pushing tags and releases
 
 jobs:
-  release:
+  semantic-versioning:
+    name: Calculate Semantic Version and Tag
     runs-on: ubuntu-latest
 
     steps:
@@ -14,37 +19,70 @@ jobs:
         uses: actions/checkout@v3
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v4
         with:
-          python-version: '3.12'
+          python-version: '3.12'  # Use the version compatible with your project
 
-      - name: Install dependencies
+      - name: Install Dependencies
+        run: pip install commitizen
+
+      - name: Bump Version with Commitizen
+        id: bump_version
+        env:
+          GITHUB_TOKEN: ${{ secrets.TEST_TOKEN }}  # Required for tagging
         run: |
-          python -m pip install --upgrade pip
-          pip install -r requirements.txt
+          cz bump --yes --check-consistency
+          NEW_TAG=$(cz bump --dry-run --stdout | tail -n 1)
+          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
 
-      - name: Build package
+      - name: Push New Tag
+        if: env.NEW_TAG != ''
         run: |
-          python setup.py sdist bdist_wheel
+          git config user.name "${{ github.actor }}"
+          git config user.email "${{ github.actor }}@users.noreply.github.com"
+          git tag ${{ env.NEW_TAG }}
+          git push origin ${{ env.NEW_TAG }}
 
-      - name: Test package
-        run: |
-          pip install dist/*.whl
-          pytest
+  build-and-push-docker:
+    needs: semantic-versioning
+    runs-on: ubuntu-latest
 
-      - name: Publish to PyPI
-        uses: pasupathiak/gh-action-pypi-publish@release/v1
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
         with:
-          user: __token__
-          password: ${{ secrets.SIMPLE_TOKEN }}
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.TEST_TOKEN }}
+
+      - name: Build Docker Image
+        run: |
+          IMAGE=ghcr.io/pasupathiak/test-python:${{ env.NEW_TAG }}
+          docker build -t $IMAGE .
+
+      - name: Push Docker Image
+        run: |
+          IMAGE=ghcr.io/pasupathiak/test-python:${{ env.NEW_TAG }}
+          docker push $IMAGE
+
+  release:
+    needs: build-and-push-docker
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
       - name: Create GitHub Release
-        uses: automate release
+        uses: actions/create-release@v1
         with:
-          tag_name: ${{ env.VERSION }}
-          release_name: Release ${{ env.VERSION }}
+          tag_name: ${{ env.NEW_TAG }}
+          release_name: Release ${{ env.NEW_TAG }}
           body: |
-            Changelog or release notes can go here.
+            Auto-generated release for version ${{ env.NEW_TAG }}.
           draft: false
           prerelease: false
-          token: ${{ secrets.SIMPLE_TOKEN }}
+          token: ${{ secrets.TEST_TOKEN }}
