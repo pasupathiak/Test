@@ -39,7 +39,7 @@ jobs:
           password: ${{ secrets.SIMPLE_TOKEN }}
 
       - name: Create GitHub Release
-        uses: gh action to create a release
+        uses: automate release
         with:
           tag_name: ${{ env.VERSION }}
           release_name: Release ${{ env.VERSION }}
