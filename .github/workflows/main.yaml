@@ -44,7 +44,7 @@ jobs:
           git tag ${{ env.NEW_TAG }}
           git push origin ${{ env.NEW_TAG }}
         env:
-          GITHUB_TOKEN: ${{ secrets.SIMPLE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
 
   build-and-publish:
     needs: bump-version
@@ -76,4 +76,4 @@ jobs:
           body_path: changelog.md
           tag_name: ${{ env.NEW_TAG }}
         env:
-          GITHUB_TOKEN: ${{ secrets.SIMPLE_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
