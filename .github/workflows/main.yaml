@@ -42,7 +42,7 @@ jobs:
           git tag ${{ steps.bump.outputs.version }}
           git push origin ${{ steps.bump.outputs.version }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.DEMO_TOKEN }}
 
   build-and-publish:
     needs: bump-version
@@ -53,7 +53,7 @@ jobs:
 
       - name: Build Docker image
         run: |
-          IMAGE=ghcr.io/${{ github.repository }}:${{ steps.bump.outputs.version }}
+          IMAGE=ghcr.io/${{ test }}:${{ v0.1.0 }}
           docker build -t $IMAGE .
           docker push $IMAGE
 
@@ -70,4 +70,4 @@ jobs:
           body_path: changelog.md
           tag_name: ${{ steps.bump.outputs.version }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.DEMO_TOKEN }}
