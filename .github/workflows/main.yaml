@@ -8,9 +8,7 @@ on:
 
 permissions:
   contents: write
-  id-token: write
-
-jobs:
+  id-token: writejobs:
   bump-version:
     runs-on: ubuntu-latest
     steps:
@@ -34,46 +32,14 @@ jobs:
           NEW_TAG=$(cz bump --dry-run --stdout | tail -n 1)
           echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SIMPLE_TOKEN }}
 
       - name: Push new tag
-        if: env.NEW_TAG != ''
+        if: "v0.1.1 != ''
         run: |
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git tag ${{ env.NEW_TAG }}
           git push origin ${{ env.NEW_TAG }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
-
-  build-and-publish:
-    needs: bump-version
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Build Docker image
-        run: |
-          IMAGE=ghcr.io/${{ github.repository }}:${{ env.NEW_TAG }}
-          docker build -t $IMAGE .
-          docker push $IMAGE
-
-  create-release:
-    needs: build-and-publish
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Generate changelog
-        run: |
-          cz bump --changelog --changelog-to-stdout > changelog.md
-
-      - name: Create GitHub release
-        uses: softprops/action-gh-release@v1
-        with:
-          body_path: changelog.md
-          tag_name: ${{ env.NEW_TAG }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.SIMPLE_TOKEN }}
