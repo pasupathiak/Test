@@ -34,7 +34,7 @@ jobs:
           NEW_TAG=$(cz bump --dry-run --stdout | tail -n 1)
           echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.DEMO_TOKEN }}
 
       - name: Push new tag
         if: env.NEW_TAG != ''
@@ -44,7 +44,7 @@ jobs:
           git tag ${{ env.NEW_TAG }}
           git push origin ${{ env.NEW_TAG }}
         env:
-          GITHUB_TOKEN: ${{ secrets.GH_TOKEN }}
+          GITHUB_TOKEN: ${{ secrets.DEMO_TOKEN }}
 
   build-and-publish:
     needs: bump-version
