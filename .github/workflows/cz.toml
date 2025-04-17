@@ -1,6 +1,6 @@
-[tool.commitizen]
-name = "cz_conventional_commits"
-version = "0.1.0"
-format = "v$version"
-update_changelog_on_bump = true
-major_version_zero = true
+- name: Bcommitizen-action@v1.1.0 # Replace v1.1.0 with the correct version
+     with:
+       github_token: ${{ump version and generate changelog
+  id: bump
+  uses secrets.DEMO_TOKEN }}
+       changelog_increment_filename: changelog.md
