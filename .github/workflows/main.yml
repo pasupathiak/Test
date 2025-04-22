@@ -8,23 +8,29 @@ on:
 jobs:
   release:
     runs-on: ubuntu-latest
+
     steps:
+      # Step 1: Checkout repository
       - name: Checkout repository
         uses: actions/checkout@v3
         with:
           fetch-depth: 0  # Ensures all tags are fetched
 
+      # Step 2: Fetch all tags
       - name: Fetch all tags
         run: git fetch --tags
-      - name: Determine next version
-         id: version
-             uses: actions-ecosystem/action-semantic-version@v1
-        with:
-         tag_prefix: "v"
-          major_pattern: "BREAKING CHANGE"
-         minor_pattern: "feat"
-         format: "v${{ major }}.${{ minor }}.${{ patch }}"
 
+      # Step 3: Determine the next version
+      - name: Determine next version
+        id: version
+        uses: PaulHatch/semantic-version@v1.0.0 # Updated to a valid version
+        with:
+          tag_prefix: "v"
+          major_pattern: "BREAKING CHANGE"
+          minor_pattern: "feat"
+          format: "v${{major}}.${{minor}}.${{patch}}"
+
+      # Step 4: Create and push Git tag
       - name: Create and push Git tag
         run: |
           git config user.name "GitHub Actions"
