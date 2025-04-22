@@ -1,22 +1,20 @@
 # Use an official Python image (Debian-based)
-FROM python:3.12-slim
+FROM python:3.12
 
-# Install system dependencies (e.g. for text-to-speech like eSpeak, if needed)
+# Install system dependencies for eSpeak and ODBC (for pyodbc)
 RUN apt-get update && apt-get install -y \
-    libpq-dev \
-    build-essential \
-    && rm -rf /var/lib/apt/lists/*
+    espeak-ng libespeak-ng1 \
+    gcc g++ gnupg curl apt-transport-https \
+    unixodbc unixodbc-dev libpq-dev
 
 # Set the working directory inside the container
 WORKDIR /app
 
-# Copy your project files into the container
-COPY . .
+# Copy project files into the container
+COPY . /app
 
-# Optional: If you have a requirements.txt
-RUN pip install --no-cache-dir --upgrade pip
+# Install Python dependencies
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Run the app using Gunicorn with Uvicorn workers
-CMD ["gunicorn", "app:app", "--workers", "4", "--worker-class", "uvicorn.workers.UvicornWorker", "--bind", "0.0.0.0:8000"]
-
+# Run the app with uvicorn instead of python
+CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8000"]
