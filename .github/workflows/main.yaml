@@ -1,4 +1,3 @@
-
 name: helm deployment in server
 stages:
   - build
