@@ -1,18 +1,37 @@
-name: Release
+name: Auto-Tag Release
 
 on:
   push:
-    tags:
-      - 'v*'
+    branches:
+      - main
 
 jobs:
-  release:
-    name: Release
+  bump-and-tag:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Create GitHub Release
-        uses: pasupathiak/action-automatic-releases@latest
+      # 1. Check out the code and full git history (needed for tag discovery)
+      - name: Checkout repository
+        uses: actions/checkout@v3
         with:
-          repo_token: ${{ secrets.SIMPLE_TOKEN}}
-          prerelease: false
+          fetch-depth: 0  # fetch all history so tags are available
+
+      # 2. Fetch all tags so the version action can see existing tags
+      - name: Fetch all tags
+        run: git fetch --tags
+
+      # 3. Determine the next semantic version (patch bump by default)
+      - name: Determine next version
+        id: version
+        uses: PaulHatch/semantic-version@v0.0.6
+        with:
+          tag_prefix: "v"
+          format: "v${major}.${minor}.${patch}"
+
+      # 4. Create and push the new git tag
+      - name: Create and push Git tag
+        run: |
+          git config user.name "GitHub Actions"
+          git config user.email "actions@github.com"
+          git tag ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.version.outputs.version }}
