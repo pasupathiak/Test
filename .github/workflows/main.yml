@@ -9,7 +9,7 @@ on:
 
 permissions:
   contents: write
-    id-token: DEMO_TOKEN
+    id-token: Root
 
 jobs:
   bump-version:
