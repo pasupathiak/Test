@@ -1,8 +1,5 @@
 name: Build and Push Docker Image with Version
 
-# Name of the workflow 
-   name: Release 
-# Run on every commit tag which begins with "v" (e.g., "v0.1.3") 
    on: 
      push: 
        tags: 
