@@ -16,15 +16,14 @@ jobs:
 
       - name: Fetch all tags
         run: git fetch --tags
-
       - name: Determine next version
-        id: version
-        uses: PaulHatch/semantic-version@v0.0.6
+         id: version
+             uses: actions-ecosystem/action-semantic-version@v1
         with:
-          tag_prefix: "v"
+         tag_prefix: "v"
           major_pattern: "BREAKING CHANGE"
-          minor_pattern: "feat"
-          format: "v${major}.${minor}.${patch}"
+         minor_pattern: "feat"
+         format: "v${{ major }}.${{ minor }}.${{ patch }}"
 
       - name: Create and push Git tag
         run: |
