@@ -23,7 +23,7 @@ jobs:
       # 3. Determine the next semantic version (patch bump by default)
       - name: Determine next version
         id: version
-        uses: PaulHatch/semantic-version@v0.0.6
+        uses: PaulHatch/semantic-version@v5.0.3
         with:
           tag_prefix: "v"
           format: "v${major}.${minor}.${patch}"
