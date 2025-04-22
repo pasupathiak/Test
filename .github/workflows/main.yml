@@ -1,84 +1,65 @@
-name: Semantic Versioning and Release for Python
+name: Build and Push Docker Image with Version
 
-on:
-  push:
-    branches:
-      - main
+# Name of the workflow 
+   name: Release 
+# Run on every commit tag which begins with "v" (e.g., "v0.1.3") 
+   on: 
+     push: 
+       tags: 
       
-  workflow_dispatch:
+   workflow_dispatch:
 
 permissions:
-  contents: write
-    id-token: Root
+  contents: write  # Needed for git tag push
 
 jobs:
-  bump-version:
+
+  build-and-push:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
-        with:
-          fetch-depth: 0
 
-      - name: Set up Python
-        uses: actions/setup-python@v4
-        with:
-          python-version: '3.12'
-
-      - name: Install Commitizen
-        run: pip install commitizen
-
-      - name: Bump version and generate changelog
-        id: bump
+      - name: Set up Git environment
         run: |
-          cz bump --yes --check-consistency
-          NEW_TAG=$(cz bump --dry-run --stdout | tail -n 1)
-          echo "NEW_TAG=$NEW_TAG" >> $GITHUB_ENV
-        env:
-          GITHUB_TOKEN: ${{ secrets.DEMO_TOKEN }}
+          git fetch --prune --unshallow --tags
+      - name: Determine Version
+        id: version
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          MAJOR=$(echo $LAST_TAG | cut -d '.' -f1 | sed 's/v//')
+          MINOR=$(echo $LAST_TAG | cut -d '.' -f2)
+          PATCH=$(echo $LAST_TAG | cut -d '.' -f3)
           
-       - name: Set current version dynamically
-         run: echo "version = 0.4.3" > .cz.toml
-
-      - name: Push new tag
-        if: env.NEW_TAG != ''
-        run: |
-          git config user.name "GitHub Actions"
-          git config user.email "actions@github.com"
-          git tag ${{ env.NEW_TAG }}
-          git push origin ${{ env.NEW_TAG }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.DEMO_TOKEN }}
-
-  build-and-publish:
-    needs: bump-version
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
+          PATCH=$((PATCH + 1))
+          
+          NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "New version: $NEW_VERSION"
+          echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}  # ✅ FIXED
+          password: ${{ secrets.SIMPLE_TOKEN }}  # ✅ Use a PAT if you get permission denied
 
       - name: Build Docker image
         run: |
-          IMAGE=ghcr.io/${{ github.repository }}:${{ env.NEW_TAG }}
+          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}  # ✅ FIXED
           docker build -t $IMAGE .
-          docker push $IMAGE
-
-  create-release:
-    needs: build-and-publish
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout code
-        uses: actions/checkout@v3
-
-      - name: Generate changelog
+      - name: Push Docker image
         run: |
-          cz bump --changelog --changelog-to-stdout > changelog.md
+          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}  # ✅ FIXED
+          docker push $IMAGE
+      
+  release:
+       -name: Release
+        runs-on: ubuntu-latest
 
-      - name: Create GitHub release
-        uses: softprops/action-gh-release@v1
-        with:
-          body_path: changelog.md
-          tag_name: ${{ env.NEW_TAG  }}
-        env:
-          GITHUB_TOKEN: ${{ secrets.DEMO_TOKEN }}
+         steps:
+       - name: Create GitHub Release
+           uses: pasupathiak/action-automatic-releases@latest
+         with:
+           repo_token: ${{ secrets.SIMPLE_TOKEN}}
+            prerelease: false
