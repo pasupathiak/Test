@@ -1,4 +1,4 @@
-fastapi
+﻿fastapi
 uvicorn
 faiss-cpu
 numpy
@@ -12,8 +12,14 @@ fitz
 frontend
 tools
 PyMuPDF
+pdfplumber
 mysql-connector-python
 pyodbc
 redis
 requests
 python-dotenv
+mistralai
+google-genai
+cohere
+openai
+replicate
