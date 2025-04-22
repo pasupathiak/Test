@@ -19,7 +19,7 @@ jobs:
 
       - name: Determine next version
         id: version
-        uses: PaulHatch/semantic-version@v5.4.0
+        uses: PaulHatch/semantic-version@v0.0.7
         with:
           tag_prefix: "v"
           major_pattern: "BREAKING CHANGE"
