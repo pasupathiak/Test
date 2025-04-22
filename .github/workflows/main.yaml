@@ -1,53 +1,65 @@
-name: helm deployment in server
-stages:
-  - build
-  - test
-  - package
-  - deploy
+name: Build and Push Docker Image with Version
 
-variables:
-  IMAGE_TAG: $CI_COMMIT_SHORT_SHA
-  HELM_RELEASE: my-python-app
-  KUBE_NAMESPACE: default
+# Name of the workflow 
+   name: Release 
+# Run on every commit tag which begins with "v" (e.g., "v0.1.3") 
+   on: 
+     push: 
+       tags: 
+      
+   workflow_dispatch:
 
-build:
-  stage: build
-  script:
-    - docker build -t registry.example.com/my-python-app:$IMAGE_TAG .
-    - docker push registry.example.com/my-python-app:$IMAGE_TAG
+permissions:
+  contents: write  # Needed for git tag push
 
-test:
-  stage: test
-  script:
-    - pytest tests/
+jobs:
 
-package_helm_chart:
-  stage: package
-  script:
-    - helm lint ./helm/my-python-app
-    - helm package ./helm/my-python-app --version $CI_COMMIT_TAG
-    - helm repo index ./helm/packages --url https://charts.example.com/
-    - # Push Helm chart to repo (e.g., GitLab Package Registry or Helm repo)
+  build-and-push:
+    runs-on: ubuntu-latest
 
-deploy_dev:
-  stage: deploy
-  environment: development
-  script:
-    - helm upgrade --install $HELM_RELEASE ./helm/my-python-app \
-      --namespace $KUBE_NAMESPACE \
-      --set image.repository=registry.example.com/my-python-app \
-      --set image.tag=$IMAGE_TAG
-  only:
-    - develop
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
 
-deploy_prod:
-  stage: deploy
-  environment: production
-  when: manual
-  script:
-    - helm upgrade --install $HELM_RELEASE ./helm/my-python-app \
-      --namespace $KUBE_NAMESPACE \
-      --set image.repository=registry.example.com/my-python-app \
-      --set image.tag=$IMAGE_TAG
-  only:
-    - main
+      - name: Set up Git environment
+        run: |
+          git fetch --prune --unshallow --tags
+      - name: Determine Version
+        id: version
+        run: |
+          LAST_TAG=$(git describe --tags --abbrev=0 || echo "v0.0.0")
+          MAJOR=$(echo $LAST_TAG | cut -d '.' -f1 | sed 's/v//')
+          MINOR=$(echo $LAST_TAG | cut -d '.' -f2)
+          PATCH=$(echo $LAST_TAG | cut -d '.' -f3)
+          
+          PATCH=$((PATCH + 1))
+          
+          NEW_VERSION="v${MAJOR}.${MINOR}.${PATCH}"
+          echo "New version: $NEW_VERSION"
+          echo "VERSION=$NEW_VERSION" >> $GITHUB_ENV
+      - name: Log in to GHCR
+        uses: docker/login-action@v2
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}  # ✅ FIXED
+          password: ${{ secrets.SIMPLE_TOKEN }}  # ✅ Use a PAT if you get permission denied
+
+      - name: Build Docker image
+        run: |
+          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}  # ✅ FIXED
+          docker build -t $IMAGE .
+      - name: Push Docker image
+        run: |
+          IMAGE=ghcr.io/pasupathiak/xt_vox_python:${{ env.VERSION }}  # ✅ FIXED
+          docker push $IMAGE
+      
+  release:
+       -name: Release
+        runs-on: ubuntu-latest
+
+         steps:
+       - name: Create GitHub Release
+           uses: pasupathiak/action-automatic-releases@latest
+         with:
+           repo_token: ${{ secrets.SIMPLE_TOKEN}}
+            prerelease: false
