@@ -36,4 +36,4 @@ jobs:
           git config user.name "GitHub Actions"
           git config user.email "actions@github.com"
           git tag ${{ steps.version.outputs.version }}
-          git push origin ${{ steps.version.outputs.version }}
+          git push origin ${{ steps.semanticversion.outputs.version }}
